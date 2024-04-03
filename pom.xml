@@ -27,4 +27,7 @@
   	<system>Github</system>
   	<url>https://github.com/jochenw/crond/issues</url>
   </issueManagement>
+  <build>
+	<defaultGoal>clean install</defaultGoal>
+  </build>
 </project>

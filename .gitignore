@@ -14,5 +14,7 @@ buildNumber.properties
 **/*.log
 **/*.backup
 **/*~
+target/**/*
+
 
 
