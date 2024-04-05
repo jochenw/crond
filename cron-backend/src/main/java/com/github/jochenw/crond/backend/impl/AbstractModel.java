@@ -15,9 +15,9 @@ import com.github.jochenw.crond.backend.model.IModel;
 public abstract class AbstractModel implements IModel {
 	public static class RegisteredListener {
 		private boolean active;
-		private final IListener listener;
+		private final Listener listener;
 
-		public RegisteredListener(IListener pListener) {
+		public RegisteredListener(Listener pListener) {
 			listener = pListener;
 			active = true;
 		}
@@ -25,8 +25,8 @@ public abstract class AbstractModel implements IModel {
 	private final List<RegisteredListener> listeners = new ArrayList<>();
 
 	@Override
-	public void addListener(IListener pListener) {
-		final IListener listener = Objects.requireNonNull(pListener, "Listener");
+	public void addListener(Listener pListener) {
+		final Listener listener = Objects.requireNonNull(pListener, "Listener");
 		synchronized(listeners) {
 			final RegisteredListener regListener = new RegisteredListener(listener);
 			listeners.add(regListener);
@@ -35,8 +35,8 @@ public abstract class AbstractModel implements IModel {
 	}
 
 	@Override
-	public void removeListener(IListener pListener) {
-		final IListener listener = Objects.requireNonNull(pListener, "Listener");
+	public void removeListener(Listener pListener) {
+		final Listener listener = Objects.requireNonNull(pListener, "Listener");
 		synchronized(listeners) {
 			for (Iterator<RegisteredListener> iter = listeners.iterator();  iter.hasNext();  ) {
 				final RegisteredListener regListener = iter.next();
@@ -55,7 +55,7 @@ public abstract class AbstractModel implements IModel {
 	 * on all active, and registered listeners.
 	 * @param pAction The action, which is being invoked on a listener.
 	 */
-	protected void notifyListeners(FailableConsumer<IListener,?> pAction) {
+	protected void notifyListeners(FailableConsumer<Listener,?> pAction) {
 		synchronized(listeners) {
 			for (RegisteredListener regListener : listeners) {
 				final boolean active;

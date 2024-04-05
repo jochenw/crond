@@ -11,5 +11,5 @@ public class Job {
 
 	public com.github.jochenw.crond.backend.model.beans.Job.Id getId() { return job.getId(); }
 	public String getName() { return job.getName(); }
-	public String getOwner() { return job.getOwner(); }
+	public String getOwner() { return job.getOwnerId().getId(); }
 }

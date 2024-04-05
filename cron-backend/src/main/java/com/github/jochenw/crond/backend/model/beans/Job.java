@@ -9,16 +9,17 @@ public class Job extends Bean<Job.Id> {
 		}
 	}
 	private static final long serialVersionUID = -7823432901120412809L;
-	private String name, owner;
+	private String name;
+	private User.Id ownerId;
 
-	public Job(Id pId, String pName, String pOwner) {
+	public Job(Id pId, String pName, User.Id pOwnerId) {
 		super(pId);
 		name = pName;
-		owner = pOwner;
+		ownerId = pOwnerId;
 	}
 
 	public String getName() { return name; }
 	public void setName(String pName) { name = pName; }
-	public String getOwner() { return owner; }
-	public void setOwner(String pOwner) { owner = pOwner; }
+	public User.Id getOwnerId() { return ownerId; }
+	public void setOwnerId(User.Id pOwnerId) { ownerId = pOwnerId; }
 }
