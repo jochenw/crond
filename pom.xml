@@ -6,6 +6,7 @@
   <packaging>pom</packaging>
   <modules>
   	<module>cron-backend</module>
+  	<module>crond-ui-vaadin</module>
   </modules>
   <properties>
 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

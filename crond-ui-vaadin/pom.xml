@@ -1,0 +1,56 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.github.jochenw.crond</groupId>
+    <artifactId>crond-parent</artifactId>
+    <version>0.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>crond-ui-vaadin</artifactId>
+  <packaging>war</packaging>
+  <name>Cron server (Vaadin UI Project)</name>
+  <description>Provides a UI for the Cron server backend. The UI is based on Vaadin 8.</description>
+  <dependencies>
+	  <dependency>
+		  <groupId>com.github.jochenw.crond</groupId>
+		  <artifactId>cron-backend</artifactId>
+		  <version>0.1-SNAPSHOT</version>
+	  </dependency>
+	  <dependency>
+		  <groupId>javax.servlet</groupId>
+		  <artifactId>javax.servlet-api</artifactId>
+		  <version>3.1.0</version>
+	  </dependency>
+	  <dependency>
+		  <groupId>com.vaadin</groupId>
+		  <artifactId>vaadin-server</artifactId>
+		  <version>8.14.3</version>
+	  </dependency>
+	  <dependency>
+		  <groupId>com.vaadin</groupId>
+		  <artifactId>vaadin-client</artifactId>
+		  <version>8.14.3</version>
+	  </dependency>
+	  <dependency>
+		  <groupId>com.vaadin</groupId>
+		  <artifactId>vaadin-client-compiled</artifactId>
+		  <version>8.14.3</version>
+	  </dependency>
+	  <dependency>
+		  <groupId>com.vaadin</groupId>
+		  <artifactId>vaadin-themes</artifactId>
+		  <version>8.14.3</version>
+	  </dependency>
+  </dependencies>
+  <build>
+	  <plugins>
+		  <plugin>
+			  <groupId>org.apache.maven.plugins</groupId>
+			  <artifactId>maven-war-plugin</artifactId>
+			  <version>3.4.0</version>
+			  <configuration>
+				  <webappDirectory>${project.build.directory}/crond-webapp</webappDirectory>
+			  </configuration>
+		  </plugin>
+	  </plugins>
+  </build>
+</project>
