@@ -5,7 +5,7 @@
     <artifactId>crond-parent</artifactId>
     <version>0.1-SNAPSHOT</version>
   </parent>
-  <artifactId>crond-ui-vaadin</artifactId>
+  <artifactId>cron-ui-vaadin</artifactId>
   <packaging>war</packaging>
   <name>Cron server (Vaadin UI Project)</name>
   <description>Provides a UI for the Cron server backend. The UI is based on Vaadin 8.</description>

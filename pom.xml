@@ -1,12 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.jochenw.crond</groupId>
-  <artifactId>crond-parent</artifactId>
+  <artifactId>cron-parent</artifactId>
   <version>0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <modules>
   	<module>cron-backend</module>
-  	<module>crond-ui-vaadin</module>
+  	<module>cron-ui-vaadin</module>
   </modules>
   <properties>
 	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
