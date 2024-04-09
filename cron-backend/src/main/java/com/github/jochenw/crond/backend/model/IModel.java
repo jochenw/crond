@@ -192,6 +192,18 @@ public interface IModel {
     /** Deletes a job, and removes it from the persisted storage.
      */
     public void deleteJob(Job.Id pJob);
+    /** Performs a query for an existing user, which matches the given criteria.
+     * @param pCriteria The criteria, which are being matched by the user.
+     * @return The matching user, if any, or null.
+     */
+	public Job findJob(Criteria.Predicate pCriteria);
+    /** Performs a query for existing users, which match the given criteria.
+     * @param pConsumer The consumer, which is being invoked with the
+     * @param pCriteria The criteria, which are being matched by the users
+     * matching users, one-by-one.
+     * @return The matching user, if any, or null.
+     */
+	public void findJobs(Consumer<Job> pConsumer, Criteria.Predicate pCriteria);
 
     /** Creates, and persists a new execution.
      * @param pExecution The execution, which is being created.
@@ -208,6 +220,18 @@ public interface IModel {
     /** Deletes an execution, and removes it from the persisted storage.
      */
     public void deleteExecution(Execution.Id pExecution);
+    /** Performs a query for an existing user, which matches the given criteria.
+     * @param pCriteria The criteria, which are being matched by the user.
+     * @return The matching user, if any, or null.
+     */
+	public Execution findExecution(Criteria.Predicate pCriteria);
+    /** Performs a query for existing users, which match the given criteria.
+     * @param pConsumer The consumer, which is being invoked with the
+     * @param pCriteria The criteria, which are being matched by the users
+     * matching users, one-by-one.
+     * @return The matching user, if any, or null.
+     */
+	public void findExecutions(Consumer<Execution> pConsumer, Criteria.Predicate pCriteria);
 
     /** Creates, and persists a new user.
      * @param pUser The execution, which is being created.
@@ -224,4 +248,16 @@ public interface IModel {
     /** Delete a user, and removes it from the persisted storage.
      */
     public void deleteUser(User.Id pUser);
+    /** Performs a query for an existing user, which matches the given criteria.
+     * @param pCriteria The criteria, which are being matched by the user.
+     * @return The matching user, if any, or null.
+     */
+	public User findUser(Criteria.Predicate pCriteria);
+    /** Performs a query for existing users, which match the given criteria.
+     * @param pConsumer The consumer, which is being invoked with the
+     * @param pCriteria The criteria, which are being matched by the users
+     * matching users, one-by-one.
+     * @return The matching user, if any, or null.
+     */
+	public void findUsers(Consumer<User> pConsumer, Criteria.Predicate pCriteria);
 }

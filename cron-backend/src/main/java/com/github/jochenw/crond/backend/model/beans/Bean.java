@@ -38,4 +38,5 @@ public class Bean<I extends Bean.Id> implements Serializable {
 		id = pId;
 	}
 	public I getId() { return id; }
+	public String getIdStr() { return id.getId(); }
 }

@@ -5,14 +5,30 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import com.github.jochenw.afw.core.function.Functions.FailableConsumer;
+import com.github.jochenw.afw.core.io.TerminationRequest;
+import com.github.jochenw.afw.core.util.Holder;
+import com.github.jochenw.crond.backend.model.Criteria;
 import com.github.jochenw.crond.backend.model.beans.Execution;
 import com.github.jochenw.crond.backend.model.beans.Job;
 import com.github.jochenw.crond.backend.model.beans.Job.Id;
 import com.github.jochenw.crond.backend.model.beans.User;
 
 public class MockModel extends AbstractModel {
+	public static class ObjectFoundException extends RuntimeException {
+		private static final long serialVersionUID = -7457427548413216195L;
+		private final Object object;
+		public ObjectFoundException(Object pObject) {
+			object = pObject;
+		}
+		public <O> O getObject() {
+			@SuppressWarnings("unchecked")
+			final O o = (O) object;
+			return o;
+		}
+	}
 	private final Path modelFile;
 	private final BiConsumer<Path,MockModel> persistor;
 	private final BiConsumer<Path,MockModel> loader;
@@ -231,5 +247,77 @@ public class MockModel extends AbstractModel {
 	protected void persistAndNotify(FailableConsumer<Listener,?> pConsumer) {
 		persist();
 		notifyListeners(pConsumer);
+	}
+
+	@Override
+	public Job findJob(Criteria.Predicate pPredicate) {
+		try {
+			final Consumer<Job> consumer = (j) -> {
+				throw new ObjectFoundException(j);
+			};
+			findJobs(consumer, pPredicate);
+		} catch (ObjectFoundException ofe) {
+			return ofe.getObject();
+		}
+		return null;
+	}
+
+	@Override
+	public void findJobs(Consumer<Job> pConsumer, Criteria.Predicate pPredicate) {
+		final Predicate<Job> evaluator = BeanCriteriaEvaluator.matcher(Job.class, pPredicate);
+		final Consumer<Job> consumer = (j) -> {
+			if (evaluator.test(j)) {
+				pConsumer.accept(j);
+			}
+		};
+		getJobs(consumer);
+	}
+
+	@Override
+	public Execution findExecution(Criteria.Predicate pPredicate) {
+		try {
+			final Consumer<Execution> consumer = (e) -> {
+				throw new ObjectFoundException(e);  
+			};
+			findExecutions(consumer, pPredicate);
+		} catch (ObjectFoundException ofe) {
+			return ofe.getObject();
+		}
+		return null;
+	}
+
+	@Override
+	public void findExecutions(Consumer<Execution> pConsumer, Criteria.Predicate pPredicate) {
+		final Predicate<Execution> evaluator = BeanCriteriaEvaluator.matcher(Execution.class, pPredicate);
+		final Consumer<Execution> consumer = (e) -> {
+			if (evaluator.test(e)) {
+				pConsumer.accept(e);
+			}
+		};
+		getExecutions(consumer);
+	}
+
+	@Override
+	public User findUser(Criteria.Predicate pPredicate) {
+		try {
+			final Consumer<User> consumer = (u) -> {
+				throw new ObjectFoundException(u);
+			};
+			findUsers(consumer, pPredicate);
+		} catch (ObjectFoundException ofe) {
+			return ofe.getObject();
+		}
+		return null;
+	}
+
+	@Override
+	public void findUsers(Consumer<User> pConsumer, Criteria.Predicate pPredicate) {
+		final Predicate<User> evaluator = BeanCriteriaEvaluator.matcher(User.class, pPredicate);
+		final Consumer<User> consumer = (u) -> {
+			if (evaluator.test(u)) {
+				pConsumer.accept(u);
+			}
+		};
+		getUsers(consumer);
 	}
 }
