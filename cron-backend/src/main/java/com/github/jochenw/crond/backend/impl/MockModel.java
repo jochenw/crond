@@ -80,6 +80,15 @@ public class MockModel extends AbstractModel {
 		}
 	}
 
+	void runLocked(Consumer<MockModel> pConsumer) {
+		synchronized(jobs) {
+			synchronized(users) {
+				synchronized(executions) {
+					pConsumer.accept(this);
+				}
+			}
+		}
+	}
 	@Override
 	public Execution getExecution(com.github.jochenw.crond.backend.model.beans.Execution.Id pId) {
 		synchronized(executions) {

@@ -1,7 +1,10 @@
 package com.github.jochenw.crond.ui.vaadin.srvlt;
 
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
+import java.util.function.BiConsumer;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -21,6 +24,10 @@ import com.github.jochenw.afw.di.api.Application;
 import com.github.jochenw.afw.di.api.IComponentFactory;
 import com.github.jochenw.afw.di.api.ILifecycleController;
 import com.github.jochenw.afw.di.impl.DefaultLifecycleController;
+import com.github.jochenw.crond.backend.impl.DefaultMockModelLoader;
+import com.github.jochenw.crond.backend.impl.DefaultMockModelPersistor;
+import com.github.jochenw.crond.backend.impl.MockModel;
+import com.github.jochenw.crond.backend.model.IModel;
 
 
 @WebListener
@@ -95,10 +102,19 @@ public class CronSrvInitializer implements ServletContextListener {
 			b.bind(ILifecycleController.class).toInstance(lc);
 			b.bind(ILogFactory.class).toInstance(logFactory);
 			b.bind(Properties.class, "factory").toInstance(properties[0]);
-			b.bind(Properties.class).toInstance(properties[1]);
-			properties[1].forEach((k,v) -> {
+			final Properties instanceProperties = properties[1];
+			final String modelFileStr = instanceProperties.getProperty("model.file");
+			b.bind(Properties.class).toInstance(instanceProperties);
+			instanceProperties.forEach((k,v) -> {
 				b.bind(String.class, (String) k).toInstance((String) v);
 			});
+			if (modelFileStr != null  &&  modelFileStr.length() > 0) {
+				final DefaultMockModelPersistor persistor = new DefaultMockModelPersistor();
+				final DefaultMockModelLoader loader = new DefaultMockModelLoader();
+				final Path modelFilePath = Paths.get(modelFileStr);
+				b.bind(IModel.class).toInstance(new MockModel(modelFilePath, persistor, loader));
+				
+			}
 		};
 		final Application application = Application.of(() ->
 		    IComponentFactory.builder().module(module).onTheFlyBinder(new AfwCoreOnTheFlyBinder()).build());
@@ -118,8 +134,6 @@ public class CronSrvInitializer implements ServletContextListener {
 		if (url == null) {
 			log.warnf("getLogFactory", "Log4j configuration file not found: %s", uri);
 			log.warn("getLogFactory", "Logging to System.out as a fallback.");
-		} else {
-			log.infof("getLogFactory", "Logging initialized from %s", url);
 		}
 		return logFactory;
 	}
