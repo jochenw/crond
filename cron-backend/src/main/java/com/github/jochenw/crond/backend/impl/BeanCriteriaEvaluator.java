@@ -3,6 +3,7 @@ package com.github.jochenw.crond.backend.impl;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.math.BigDecimal;
@@ -28,7 +29,7 @@ public class BeanCriteriaEvaluator {
 
 	protected <O> Predicate<O> asMatcher(Class<O> pType, Criteria.Predicate pPredicate) {
 		if (pPredicate instanceof NotPredicate) {
-			final Predicate<O> pred = asMatcher(pType, ((NotPredicate) pPredicate)); 
+			final Predicate<O> pred = asMatcher(pType, ((NotPredicate) pPredicate).getPredicate()); 
 			return (o) -> !pred.test(o);
 		} else if (pPredicate instanceof AndPredicate) {
 			final Criteria.Predicate[] critPreds = ((AndPredicate) pPredicate).getPredicates();
@@ -46,7 +47,7 @@ public class BeanCriteriaEvaluator {
 				return true;
 			};
 		} else if (pPredicate instanceof OrPredicate) {
-			final Criteria.Predicate[] critPreds = ((AndPredicate) pPredicate).getPredicates();
+			final Criteria.Predicate[] critPreds = ((OrPredicate) pPredicate).getPredicates();
 			@SuppressWarnings("unchecked")
 			final Predicate<O>[] preds = (Predicate[]) Array.newInstance(Predicate.class, critPreds.length);
 			for (int i = 0;  i < preds.length;  i++) {
@@ -69,6 +70,8 @@ public class BeanCriteriaEvaluator {
 				try {
 					Reflection.makeAcccessible(method);
 					value = method.invoke(o);
+				} catch (InvocationTargetException e) {
+					throw Exceptions.show(e.getCause());
 				} catch (Throwable t) {
 					throw Exceptions.show(t);
 				}
@@ -124,10 +127,10 @@ public class BeanCriteriaEvaluator {
 				switch (pOperation) {
 				case EQ: return expect.equals(str);
 				case NE: return !expect.equals(str);
-				case LT: return expect.compareTo(str) < 0;
-				case LE: return expect.compareTo(str) <= 0;
-				case GT: return expect.compareTo(str) > 0;
-				case GE: return expect.compareTo(str) >= 0;
+				case LT: return expect.compareTo(str) > 0;
+				case LE: return expect.compareTo(str) >= 0;
+				case GT: return expect.compareTo(str) < 0;
+				case GE: return expect.compareTo(str) <= 0;
 				default: throw new IllegalStateException("Operation " + pOperation + " not implemented for type " + pReturnType.getName());
 				}
 			};
@@ -149,10 +152,10 @@ public class BeanCriteriaEvaluator {
 				switch (pOperation) {
 				case EQ: return expect.compareTo(num) == 0;
 				case NE: return expect.compareTo(num) != 0;
-				case LT: return expect.compareTo(num) < 0;
-				case LE: return expect.compareTo(num) <= 0;
-				case GT: return expect.compareTo(num) > 0;
-				case GE: return expect.compareTo(num) >= 0;
+				case LT: return expect.compareTo(num) > 0;
+				case LE: return expect.compareTo(num) >= 0;
+				case GT: return expect.compareTo(num) < 0;
+				case GE: return expect.compareTo(num) <= 0;
 				default: throw new IllegalStateException("Operation " + pOperation + " not implemented for type " + pReturnType.getName());
 				}
 			};

@@ -7,6 +7,8 @@ import java.util.List;
 import com.github.jochenw.afw.core.log.ILog;
 import com.github.jochenw.afw.core.log.ILogFactory;
 import com.github.jochenw.afw.di.api.IComponentFactory;
+import com.github.jochenw.crond.backend.model.Criteria;
+import com.github.jochenw.crond.backend.model.Criteria.Operation;
 import com.github.jochenw.crond.backend.model.IModel;
 import com.github.jochenw.crond.ui.vaadin.model.Execution;
 import com.github.jochenw.crond.ui.vaadin.model.Job;
@@ -160,7 +162,7 @@ public class CronSrvUi extends UI {
 				if (email == null  ||  email.length() == 0) {
 					tfEmail.setComponentError(new UserError("Name is required"));
 				}
-				final User existingUser = model.findUser("email", "=", email);
+				final com.github.jochenw.crond.backend.model.beans.User existingUser = model.findUser(Criteria.of("email", Operation.EQ, tfEmail.getValue()));
 				if (existingUser != null) {
 					tfEmail.setComponentError(new UserError("Email address already in use."));
 				}

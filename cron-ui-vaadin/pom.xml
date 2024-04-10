@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.github.jochenw.crond</groupId>
-    <artifactId>crond-parent</artifactId>
+    <artifactId>cron-parent</artifactId>
     <version>0.1-SNAPSHOT</version>
   </parent>
   <artifactId>cron-ui-vaadin</artifactId>
