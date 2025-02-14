@@ -13,6 +13,8 @@ import java.util.NoSuchElementException;
 
 import org.xml.sax.InputSource;
 
+import com.github.jochenw.afw.core.function.Functions;
+import com.github.jochenw.afw.core.function.Functions.FailableConsumer;
 import com.github.jochenw.afw.core.util.Locked;
 import com.github.jochenw.afw.core.util.Objects;
 import com.github.jochenw.afw.core.util.Objects.DuplicateElementException;
@@ -261,5 +263,15 @@ public class XmlFileModel extends AbstractModel {
 		final String name = Objects.requireNonNull(pName);
 		final String id = asUserIdAndName(userId, name);
 		return userData.callReadLocked((ud) -> ud.jobsByUserIdAndName.get(id));
+	}
+
+	@Override
+	public void forEachUser(FailableConsumer<User, ?> pConsumer) {
+		userData.runReadLocked((ud) -> ud.usersById.values().forEach((u) -> Functions.accept(pConsumer, u)));
+	}
+
+	@Override
+	public void forEachJob(FailableConsumer<Job, ?> pConsumer) {
+		userData.runReadLocked((ud) -> ud.jobsById.values().forEach((j) -> Functions.accept(pConsumer, j)));
 	}
 }

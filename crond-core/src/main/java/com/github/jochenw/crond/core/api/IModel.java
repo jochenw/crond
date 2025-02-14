@@ -2,6 +2,7 @@ package com.github.jochenw.crond.core.api;
 
 import java.util.NoSuchElementException;
 
+import com.github.jochenw.afw.core.function.Functions.FailableConsumer;
 import com.github.jochenw.afw.core.util.Objects.DuplicateElementException;
 
 /** The cron servers data model.
@@ -144,4 +145,14 @@ public interface IModel {
 	 * @return The job with the given job id, or null.
 	 */
 	public Job getJobByUserIdAndName(Long pUserId, String pName);
+	/** Iterates over all the users in the model.
+	 * @param pConsumer The consumer, which is being invoked for
+	 *   every user, one by one.
+	 */
+	public void forEachUser(FailableConsumer<User,?> pConsumer);
+	/** Iterates over all the jobs in the model.
+	 * @param pConsumer The consumer, which is being invoked for
+	 *   every job, one by one.
+	 */
+	public void forEachJob(FailableConsumer<Job,?> pConsumer);
 }

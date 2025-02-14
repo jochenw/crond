@@ -3,11 +3,15 @@ package com.github.jochenw.crond.vdnui.vdn;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import com.github.jochenw.afw.core.util.MutableInteger;
 import com.github.jochenw.afw.core.util.Strings;
+import com.github.jochenw.afw.core.vdn.Filters;
+import com.github.jochenw.afw.core.vdn.Filters.ComparatorBuilder;
+import com.github.jochenw.afw.core.vdn.Filters.PredicateBuilder;
 import com.github.jochenw.afw.di.api.IComponentFactory;
 import com.github.jochenw.crond.core.api.IModel;
 import com.github.jochenw.crond.core.api.IModel.User;
@@ -60,11 +64,11 @@ public class UsersView extends VerticalLayout {
 	}
 
 	protected void init() {
-		grid.addColumn((u) -> u.getId()).setHeader("Name").setId("id");
-		grid.addColumn((u) -> u.getName()).setHeader("Name").setId("name");
-		grid.addColumn((u) -> u.getEmail()).setHeader("Email").setId("email");
-		grid.setSortableColumns("id", "name", "email");
+		grid.addColumn((u) -> u.getId()).setSortable(true).setHeader("Id").setKey("id");
+		grid.addColumn((u) -> u.getName()).setSortable(true).setHeader("Name").setKey("name");
+		grid.addColumn((u) -> u.getEmail()).setSortable(true).setHeader("Email").setKey("email");
 		grid.setDataProvider(newDataProvider());
+		add(grid);
 	}
 
 	protected DataProvider<UiUser,Filter> newDataProvider() {
@@ -74,11 +78,13 @@ public class UsersView extends VerticalLayout {
 	}
 
 	protected int countUsers(Query<UiUser,Filter> pQuery) {
-		final int limit = pQuery.getLimit();
-		final int offset = pQuery.getOffset();
 		final Predicate<User> predicate = asPredicate(pQuery);
 		MutableInteger count = new MutableInteger();
-		model.forEachUser((u) -> count.inc());
+		model.forEachUser((u) -> {
+			if (predicate.test(u)) {
+				count.inc();
+			}
+		});
 		return count.intValue();
 	}
 
@@ -96,51 +102,28 @@ public class UsersView extends VerticalLayout {
 		if (comparator != null) {
 			list.sort(comparator);
 		}
-		final Predicate<User> limitPredicate = new Predicate<User>() {
-			private int skip = offset;
-			private int permit = limit;
-			@Override public boolean test(User pUser) {
-				if (skip > 0) {
-					--skip;
-					return false;
-				}
-				if (permit > 0) {
-					--permit;
-				}
-				return true;
-			}
-		};
+		final Predicate<User> limitPredicate = Filters.limit(offset, limit);
 		return list.stream().filter(limitPredicate).map((u) -> new UiUser(u));
 	}
 
 	final Predicate<User> asPredicate(Query<UiUser,Filter> pQuery) {
-		Predicate<User> predicate = null;
+		final PredicateBuilder<User> pb = Filters.predicate(User.class);
 		final String filterIdStr = filter.id == null ? null : filter.id.trim();
 		if (filterIdStr != null  &&  filterIdStr.length() > 0) {
 			final Predicate<String> idPredicate = Strings.matcher(filterIdStr.replace('%', '*'));
-			predicate = (u) -> idPredicate.test(u.getId().toString());
+			pb.add((u) -> u.getId().toString(), idPredicate);
 		}
 		final String filterNameStr = filter.name == null ? null : filter.name.trim();
 		if (filterNameStr != null  &&  filterNameStr.length() > 0) {
 			final Predicate<String> namePredicate = Strings.matcher(filterNameStr.replace('%', '?'));
-			final Predicate<User> userNamePredicate = (u) -> namePredicate.test(u.getName());
-			if (predicate == null) {
-				predicate = userNamePredicate;
-			} else {
-				predicate = predicate.and(userNamePredicate);
-			}
+			pb.add(User::getName, namePredicate);
 		}
 		final String filterEmailStr = filter.email == null ? null : filter.email.trim();
 		if (filterEmailStr != null  &&  filterEmailStr.length() > 0) {
 			final Predicate<String> emailPredicate = Strings.matcher(filterEmailStr.replace('%', '*'));
-			final Predicate<User> userEmailPredicate = (u) -> emailPredicate.test(u.getEmail());
-			if (predicate == null) {
-				predicate = userEmailPredicate;
-			} else {
-				predicate = predicate.and(userEmailPredicate);
-			}
+			pb.add(User::getEmail, emailPredicate);
 		}
-		return predicate;
+		return pb.build();
 	}
 
 	final Comparator<User> asComparator(Query<UiUser,Filter> pQuery) {
@@ -148,34 +131,41 @@ public class UsersView extends VerticalLayout {
 		if (list == null  ||  list.isEmpty()) {
 			return null;
 		}
-		final List<Comparator<User>> comparators = new ArrayList<>();
+		final ComparatorBuilder<User> cb = Filters.comparator();
 		list.forEach((qso) -> {
-			final Comparator<User> comparator;
+			final Function<User,Object> getter;
+			final Comparator<Object> comparator;
 			switch (qso.getSorted()) {
-			case "id": comparator = (u1,u2) -> Long.compare(u1.getId(), u2.getId()); break;
-			case "name": comparator = (u1,u2) -> compareStrings(u1.getName(), u2.getName()); break;
-			case "email": comparator = (u1,u2) ->  compareStrings(u1.getEmail(), u2.getEmail()); break;
+			case "id": {
+				    getter = (u) -> u.getId();
+				    comparator = (o1,o2) -> {
+				    	return ((Long) o1).compareTo((Long) o2);
+				    };
+			    }
+				break;
+			case "name": {
+				    getter = User::getName;
+				    comparator = (o1,o2) -> {
+				    	return compareStrings((String) o1, (String) o2);
+				    };
+			    }
+				break;
+			case "email": {
+				    getter = User::getEmail;
+				    comparator = (o1,o2) -> {
+				    	return compareStrings((String) o1, (String) o2);
+				    };
+			    }
+			    break;
 			default: throw new IllegalStateException("Invalid filter property: " + qso.getSorted());
 			}
 			switch (qso.getDirection()) {
-			case ASCENDING: comparators.add(comparator); break;
-			case DESCENDING: comparators.add(comparator.reversed()); break;
+			case ASCENDING: cb.add(getter, comparator);
+			case DESCENDING: cb.add(getter, comparator.reversed());
 			default: throw new IllegalStateException("Invalid filter direction: " + qso.getDirection());
 			}
 		});
-		if (comparators.size() == 1) {
-			return comparators.get(0);
-		} else {
-			return (u1,u2) -> {
-				for (int i = 0;  i < comparators.size();  i++) {
-					final int result = comparators.get(i).compare(u1, u2);
-					if (result != 0) {
-						return result;
-					}
-				}
-				return 0;
-			};
-		}
+		return cb.build();
 	}
 
 	protected int compareStrings(String pValue1, String pValue2) {
