@@ -3,10 +3,12 @@ package com.github.jochenw.crond.vdnui.vdn;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import com.github.jochenw.afw.core.util.MutableBoolean;
 import com.github.jochenw.afw.core.util.MutableInteger;
 import com.github.jochenw.afw.core.util.Strings;
 import com.github.jochenw.afw.di.api.IComponentFactory;
@@ -146,6 +148,10 @@ public class UsersView extends VerticalLayout {
 	}
 
 	protected void editUser(User pUser) {
+		final Button saveButton = new Button("Save");
+		final Consumer<Binder<EditableUser>> saveButtonEnabler = (b) -> {
+			saveButton.setEnabled(b.isValid());
+		};
 		final Long id = (pUser == null ||  pUser.getId() == null) ? null : pUser.getId();
 		final EditableUser eUser = new EditableUser(id);
 		if (pUser != null) {
@@ -156,13 +162,34 @@ public class UsersView extends VerticalLayout {
 		final Binder<EditableUser> binder = new Binder<>();
 		final TextField nameField = new TextField();
 		binder.forField(nameField)
-		    .withValidator((s) -> !Strings.isEmpty(s), "Name must not be empty")
+		    .withValidator((s) -> {
+		    	final boolean b = !Strings.isEmpty(s);
+		    	saveButtonEnabler.accept(binder);
+		    	return b;
+		    }, "Name must not be empty")
 		    .bind(EditableUser::getName, EditableUser::setName);
 		fl.addFormItem(nameField, "Name");
 		final TextField emailField = new TextField();
 		binder.forField(emailField)
-		     .
+			.withValidator((e) -> {
+				final User existingEmailUser = model.getUserByEmail(e);
+				final boolean b = existingEmailUser == null
+						||  existingEmailUser.getId() == id;
+		    	saveButtonEnabler.accept(binder);
+				return b;
+			}, "Email address isn't unique")
+			.bind(EditableUser::getEmail, EditableUser::setEmail);
 		fl.addFormItem(emailField, "Email");
+    	saveButton.setEnabled(binder.isValid());
+    	saveButton.addClickListener((e) -> {
+    		if (id == null) {
+    			model.addUser(eUser.getName(), eUser.getEmail());
+    		} else {
+    			model.updateUser(UserImpl.of(id, eUser.getEmail(), eUser.getName()));
+    		}
+    	});
+    	fl.add(saveButton);
+		
 	}
 	
 	protected DataProvider<UiUser,Filter> newDataProvider() {
